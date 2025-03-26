@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
 import LoginPopup from "./LoginPopup";
 import SignupPopup from "./SignupPopup";
+import { useNavigate } from "react-router-dom";
 
 const TABS = [
   { title: "Category" },
@@ -17,6 +18,8 @@ const Navbar = () => {
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+
+  const navigate = useNavigate();
 
   // Load user data from localStorage on component mount
   useEffect(() => {
@@ -60,7 +63,10 @@ const Navbar = () => {
             {user ? (
               // If user is logged in, show name and logout button
               <>
-                <span className="text-yellow-400 font-semibold mr-4 drop-shadow-lg cursor-pointer hover:text-yellow-300">
+                <span
+                  className="text-yellow-400 font-semibold mr-4 drop-shadow-lg cursor-pointer hover:text-yellow-300"
+                  onClick={() => navigate("/admin")}
+                >
                   {user.name}
                 </span>
 
