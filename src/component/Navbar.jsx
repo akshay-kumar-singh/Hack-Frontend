@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
 import LoginPopup from "./LoginPopup";
 import SignupPopup from "./SignupPopup";
@@ -16,6 +16,28 @@ const Navbar = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // Load user data from localStorage on component mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  // Handle successful login
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData)); // Save user data in localStorage
+    setIsLoginOpen(false);
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem("user"); // Remove user data from localStorage
+  };
 
   return (
     <>
@@ -25,19 +47,40 @@ const Navbar = () => {
 
           <div className="hidden md:flex space-x-8">
             {TABS.map((item, index) => (
-              <div key={index} className="text-white font-medium hover:text-yellow-300">
+              <div
+                key={index}
+                className="text-white font-medium hover:text-yellow-300"
+              >
                 {item.title}
               </div>
             ))}
           </div>
 
-          <div className="ml-auto">
-            <button
-              onClick={() => setIsLoginOpen(true)}
-              className="text-sm font-medium text-white border border-yellow-300 px-5 py-2 rounded-md hover:bg-yellow-300 hover:text-gray-900 transition"
-            >
-              Login
-            </button>
+          <div className="ml-auto flex items-center">
+            {user ? (
+              // If user is logged in, show name and logout button
+              <>
+                <span className="text-yellow-400 font-semibold mr-4 drop-shadow-lg cursor-pointer hover:text-yellow-300">
+                  {user.name}
+                </span>
+
+                <button
+                  onClick={handleLogout}
+                  className="text-sm font-medium text-white border border-red-400 px-5 py-2 rounded-md hover:bg-red-400 hover:text-white transition"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              // If not logged in, show login button
+              <button
+                onClick={() => setIsLoginOpen(true)}
+                className="text-sm font-medium text-white border border-yellow-300 px-5 py-2 rounded-md hover:bg-yellow-300 hover:text-gray-900 transition"
+              >
+                Login
+              </button>
+            )}
+
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden text-white ml-4"
@@ -69,6 +112,7 @@ const Navbar = () => {
             setIsLoginOpen(false);
             setIsSignupOpen(true);
           }}
+          onLoginSuccess={handleLoginSuccess} // Pass the login success handler
         />
       )}
 

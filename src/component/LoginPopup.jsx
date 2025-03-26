@@ -2,24 +2,16 @@ import React, { useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import { loginUser } from "../services/services";
 
-const LoginPopup = ({ onClose, onToggle }) => {
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+const LoginPopup = ({ onClose, onToggle, onLoginSuccess }) => {
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -27,12 +19,17 @@ const LoginPopup = ({ onClose, onToggle }) => {
 
     try {
       const response = await loginUser(formData);
-      // Handle successful login (redirect or show success message)
-      console.log("Login successful:", response);
-      onClose(); // Close popup on success
-      // You might want to update global auth state here
+      console.log("API Response:", response); // Debugging
+
+      if (response.token && response.user) {
+        localStorage.setItem("user", JSON.stringify(response.user)); // Store user info
+        onLoginSuccess(response.user); // Update navbar with user data
+        onClose(); // Close popup
+      } else {
+        setError(response.message || "Invalid credentials. Please try again.");
+      }
     } catch (err) {
-      setError(err.message || "Login failed. Please try again.");
+      setError("Login failed. Please check your credentials and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -55,33 +52,23 @@ const LoginPopup = ({ onClose, onToggle }) => {
             Unlock Your Learning Potential with <br />
             <span className="text-yellow-300">Exclusive Features! 🚀</span>
           </h2>
-          <img
-            src="ask.webp"
-            alt="Student Learning"
-            className="md:w-32 w-24 md:h-32 h-24 object-contain mt-4"
-          />
+          <img src="ask.webp" alt="Student Learning" className="md:w-32 w-24 md:h-32 h-24 object-contain mt-4" />
 
           <ul className="space-y-2 text-sm mt-3">
             <li className="flex items-center">
-              <FaCheckCircle className="text-green-400 mr-2" /> Unlimited doubt
-              solving with expert guidance
+              <FaCheckCircle className="text-green-400 mr-2" /> Unlimited doubt solving with expert guidance
             </li>
             <li className="flex items-center">
-              <FaCheckCircle className="text-green-400 mr-2" /> Video solutions
-              in multiple languages
+              <FaCheckCircle className="text-green-400 mr-2" /> Video solutions in multiple languages
             </li>
             <li className="flex items-center">
-              <FaCheckCircle className="text-green-400 mr-2" /> Exclusive live
-              classes & expert mentorship
+              <FaCheckCircle className="text-green-400 mr-2" /> Exclusive live classes & expert mentorship
             </li>
           </ul>
         </div>
 
         <div className="md:w-1/2 w-full md:p-8 p-3 flex flex-col justify-center bg-gray-50 rounded-r-lg">
-          <h2 className="md:text-3xl text-xl font-bold text-gray-800 mb-6">
-            Welcome Back!
-          </h2>
-
+          <h2 className="md:text-3xl text-xl font-bold text-gray-800 mb-6">Welcome Back!</h2>
 
           {error && (
             <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-md text-sm">
@@ -89,7 +76,7 @@ const LoginPopup = ({ onClose, onToggle }) => {
             </div>
           )}
 
-<form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
             <input
               type="email"
               name="email"
@@ -110,11 +97,7 @@ const LoginPopup = ({ onClose, onToggle }) => {
             />
 
             <div className="flex justify-between mb-4">
-              <button
-                type="button"
-                className="text-blue-500"
-                onClick={() => setIsForgotPassword(true)}
-              >
+              <button type="button" className="text-blue-500">
                 Forgot Password?
               </button>
               <button type="button" onClick={onToggle} className="text-blue-500">
