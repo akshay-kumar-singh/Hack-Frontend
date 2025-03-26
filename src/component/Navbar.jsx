@@ -1,61 +1,87 @@
-import React from 'react';
+import React, { useState } from "react";
+import { FaBars, FaTimes } from "react-icons/fa";
+import LoginPopup from "./LoginPopup";
+import SignupPopup from "./SignupPopup";
+
+const TABS = [
+  { title: "Category" },
+  { title: "Courses" },
+  { title: "Ask your Doubt" },
+  { title: "Free Study" },
+  { title: "Exam Alert" },
+  { title: "Monetize your Expertise" },
+];
 
 const Navbar = () => {
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isSignupOpen, setIsSignupOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
-    <nav className="bg-blue-700 text-white p-4 shadow-lg">
-      <div className="container mx-auto flex justify-between items-center">
-        {/* Logo Section */}
-        <div className="text-2xl font-bold">
-          <a href="/" className="hover:text-blue-300">
-            MyBrand
-          </a>
-        </div>
+    <>
+      <nav className="fixed top-0 left-0 w-full z-50 bg-gradient-to-r from-blue-700 to-indigo-800 bg-opacity-90 shadow-lg backdrop-blur-md">
+        <div className="relative flex items-center justify-between w-full px-6 lg:px-12 py-4">
+          <div className="text-white text-xl font-bold">LOGO</div>
 
-        {/* Navigation Links */}
-        <ul className="hidden md:flex space-x-6 text-lg">
-          <li>
-            <a href="/" className="hover:text-blue-300">
-              Home
-            </a>
-          </li>
-          <li>
-            <a href="/about" className="hover:text-blue-300">
-              About
-            </a>
-          </li>
-          <li>
-            <a href="/services" className="hover:text-blue-300">
-              Services
-            </a>
-          </li>
-          <li>
-            <a href="/contact" className="hover:text-blue-300">
-              Contact
-            </a>
-          </li>
-        </ul>
+          <div className="hidden md:flex space-x-8">
+            {TABS.map((item, index) => (
+              <div key={index} className="text-white font-medium hover:text-yellow-300">
+                {item.title}
+              </div>
+            ))}
+          </div>
 
-        {/* Mobile Menu (hamburger icon) */}
-        <div className="md:hidden">
-          <button className="focus:outline-none">
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+          <div className="ml-auto">
+            <button
+              onClick={() => setIsLoginOpen(true)}
+              className="text-sm font-medium text-white border border-yellow-300 px-5 py-2 rounded-md hover:bg-yellow-300 hover:text-gray-900 transition"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
+              Login
+            </button>
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden text-white ml-4"
+            >
+              {isMenuOpen ? <FaTimes size={28} /> : <FaBars size={28} />}
+            </button>
+          </div>
         </div>
-      </div>
-    </nav>
+
+        {isMenuOpen && (
+          <div className="absolute top-16 left-0 w-full bg-gray-900 text-white shadow-xl rounded-b-lg flex flex-col items-center py-6 space-y-4 md:hidden">
+            {TABS.map((item, index) => (
+              <div
+                key={index}
+                className="text-lg font-semibold tracking-wide w-full text-center py-2 hover:bg-blue-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {item.title}
+              </div>
+            ))}
+          </div>
+        )}
+      </nav>
+
+      {isLoginOpen && (
+        <LoginPopup
+          onClose={() => setIsLoginOpen(false)}
+          onToggle={() => {
+            setIsLoginOpen(false);
+            setIsSignupOpen(true);
+          }}
+        />
+      )}
+
+      {isSignupOpen && (
+        <SignupPopup
+          onClose={() => setIsSignupOpen(false)}
+          onToggle={() => {
+            setIsSignupOpen(false);
+            setIsLoginOpen(true);
+          }}
+        />
+      )}
+    </>
   );
 };
 
