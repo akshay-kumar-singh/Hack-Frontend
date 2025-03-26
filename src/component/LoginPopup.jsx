@@ -1,8 +1,42 @@
 import React, { useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
+import { loginUser } from "../services/services";
 
 const LoginPopup = ({ onClose, onToggle }) => {
   const [isForgotPassword, setIsForgotPassword] = useState(false);
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await loginUser(formData);
+      // Handle successful login (redirect or show success message)
+      console.log("Login successful:", response);
+      onClose(); // Close popup on success
+      // You might want to update global auth state here
+    } catch (err) {
+      setError(err.message || "Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -48,18 +82,31 @@ const LoginPopup = ({ onClose, onToggle }) => {
             Welcome Back!
           </h2>
 
-          <form>
+
+          {error && (
+            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-md text-sm">
+              {error}
+            </div>
+          )}
+
+<form onSubmit={handleSubmit}>
             <input
               type="email"
               name="email"
               placeholder="Email Address"
               className="w-full text-black border rounded-2xl px-4 py-3 mb-4"
+              value={formData.email}
+              onChange={handleChange}
+              required
             />
             <input
               type="password"
               name="password"
               placeholder="Password"
               className="w-full text-black border rounded-2xl px-4 py-3 md:mb-4 mb-2"
+              value={formData.password}
+              onChange={handleChange}
+              required
             />
 
             <div className="flex justify-between mb-4">
@@ -77,9 +124,10 @@ const LoginPopup = ({ onClose, onToggle }) => {
 
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-3 rounded-3xl"
+              className="w-full bg-blue-500 text-white py-3 rounded-3xl disabled:opacity-50"
+              disabled={isLoading}
             >
-              Login & Start Learning 🚀
+              {isLoading ? "Logging in..." : "Login & Start Learning 🚀"}
             </button>
           </form>
         </div>

@@ -1,7 +1,47 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaCheckCircle } from "react-icons/fa";
-
+import { registerUser } from "../services/services";
 const SignupPopup = ({ onClose, onToggle }) => {
+  const [formData, setFormData] = useState({
+    name: "", // Changed from username to name to match backend
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    setSuccess(false);
+
+    try {
+      const response = await registerUser(formData);
+      setSuccess(true);
+      console.log("Registration successful:", response);
+      
+      // Optional: Auto-close after success or show success message
+      setTimeout(() => {
+        onClose();
+        onToggle(); // Switch to login popup
+      }, 1500);
+    } catch (err) {
+      setError(err.message || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="absolute inset-0 bg-opacity-50 backdrop-blur-xs" onClick={onClose}></div>
@@ -30,23 +70,40 @@ const SignupPopup = ({ onClose, onToggle }) => {
         <div className="md:w-1/2 w-full md:p-8 p-3 flex flex-col justify-center bg-gray-50 rounded-r-lg">
           <h2 className="md:text-3xl text-xl font-bold text-gray-800 mb-6">Create Your Account</h2>
 
-          <form>
+          {error && (
+            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded-md text-sm">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-4 p-2 bg-green-100 text-green-700 rounded-md text-sm">
+              Registration successful! Redirecting to login...
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
             <div className="mb-3">
               <input
                 type="text"
-                name="username"
-                placeholder="Enter your username"
+                name="name"  // Changed from username to name to match backend
+                placeholder="Enter your full name"
                 className="w-full border border-gray-300 rounded-2xl px-4 py-3 text-gray-800"
+                value={formData.name}
+                onChange={handleChange}
+                required
               />
             </div>
 
-            {/* Changed input from mobile to email */}
             <div className="mb-3">
               <input
                 type="email"
                 name="email"
                 placeholder="Enter your Email Address"
                 className="w-full border border-gray-300 rounded-2xl px-4 py-3 text-gray-800"
+                value={formData.email}
+                onChange={handleChange}
+                required
               />
             </div>
 
@@ -56,20 +113,29 @@ const SignupPopup = ({ onClose, onToggle }) => {
                 name="password"
                 placeholder="Create a password"
                 className="w-full border border-gray-300 rounded-2xl px-4 py-3 text-gray-800"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                minLength="6"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full mt-2.5 bg-blue-500 text-white py-3 rounded-3xl hover:bg-blue-600 transition shadow-md transform hover:scale-105"
+              className="w-full mt-2.5 bg-blue-500 text-white py-3 rounded-3xl hover:bg-blue-600 transition shadow-md transform hover:scale-105 disabled:opacity-50"
+              disabled={isLoading}
             >
-              Sign Up & Start Learning 🎓
+              {isLoading ? "Creating account..." : "Sign Up & Start Learning 🎓"}
             </button>
           </form>
 
           <p className="mt-4 text-sm text-center text-pink-600">
             Already have an account?{" "}
-            <button onClick={onToggle} className="text-blue-500 font-semibold hover:underline">
+            <button 
+              onClick={onToggle} 
+              className="text-blue-500 font-semibold hover:underline"
+              disabled={isLoading}
+            >
               Log in here
             </button>
           </p>
